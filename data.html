@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система активирована</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: linear-gradient(145deg, #111, #1a0a0a);
+            border: 2px solid #ff3355;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 60px rgba(255, 51, 85, 0.2);
+            text-align: center;
+        }
+        
+        .header {
+            color: #ff3355;
+            font-size: 22px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .subheader {
+            color: #ff6680;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        
+        .user-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px solid #ff3355;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #444;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+        
+        .user-photo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .info-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 51, 85, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .info-block .label {
+            color: #ff6680;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-block .value {
+            color: #00ffcc;
+            font-size: 14px;
+            margin-top: 5px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .screenshots {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .screenshots img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1a1a1a;
+            min-height: 80px;
+            object-fit: cover;
+        }
+        
+        .screenshots .empty {
+            background: #1a1a1a;
+            height: 100px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            font-size: 12px;
+            border: 1px dashed #333;
+        }
+        
+        .status {
+            color: #ff3355;
+            font-size: 14px;
+            animation: blink 1s infinite;
+            margin: 20px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .footer {
+            color: #555;
+            font-size: 10px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
+        }
+        
+        .warning {
+            color: #ff3355;
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid rgba(255,51,85,0.2);
+            border-radius: 8px;
+            background: rgba(255,51,85,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">🔴 СИСТЕМА АКТИВИРОВАНА</div>
+        <div class="subheader">Ваши данные находятся в открытом доступе</div>
+        
+        <div class="user-photo" id="userPhoto">
+            <span>📸</span>
+        </div>
+        
+        <div class="info-block">
+            <div class="label">📱 Телефон</div>
+            <div class="value" id="userPhone">+7XXX XXX XX XX</div>
+        </div>
+        
+        <div class="info-block">
+            <div class="label">👤 Имя</div>
+            <div class="value" id="userName">Неизвестно</div>
+        </div>
+        
+        <div class="info-block">
+            <div class="label">💬 Данные из переписки</div>
+            <div class="value" id="userData">Загружаются...</div>
+        </div>
+        
+        <div class="info-block">
+            <div class="label">📸 Скриншоты переписки</div>
+            <div class="screenshots" id="screenshots">
+                <div class="empty">Нет данных</div>
+                <div class="empty">Нет данных</div>
+            </div>
+        </div>
+        
+        <div class="status">⚠️ ДАННЫЕ ОПУБЛИКОВАНЫ</div>
+        
+        <div class="warning">
+            ⚡ Для удаления данных обратитесь к владельцу стрима
+        </div>
+        
+        <div class="footer">
+            Система активирована • Время публикации: <span id="time"></span>
+        </div>
+    </div>
+
+    <script>
+        // ========== ПАРСИНГ ДАННЫХ ИЗ URL ==========
+        const params = new URLSearchParams(window.location.search);
+        const dataParam = params.get('data');
+        
+        if (dataParam) {
+            try {
+                // Декодируем данные из base64
+                const decoded = JSON.parse(atob(decodeURIComponent(dataParam)));
+                console.log('Данные загружены:', decoded);
+                
+                // Фото
+                if (decoded.photo) {
+                    document.getElementById('userPhoto').innerHTML = `<img src="${decoded.photo}" alt="Фото пользователя">`;
+                }
+                
+                // Телефон
+                if (decoded.phone) {
+                    document.getElementById('userPhone').textContent = decoded.phone;
+                }
+                
+                // Имя
+                if (decoded.name) {
+                    document.getElementById('userName').textContent = decoded.name;
+                }
+                
+                // Данные
+                if (decoded.data) {
+                    document.getElementById('userData').textContent = decoded.data;
+                }
+                
+                // Скриншоты
+                if (decoded.screenshots && decoded.screenshots.length > 0) {
+                    const container = document.getElementById('screenshots');
+                    container.innerHTML = '';
+                    decoded.screenshots.forEach(src => {
+                        const img = document.createElement('img');
+                        img.src = src;
+                        img.onerror = function() {
+                            this.outerHTML = `<div class="empty">❌ Ошибка загрузки</div>`;
+                        };
+                        container.appendChild(img);
+                    });
+                }
+            } catch(e) {
+                console.error('Ошибка загрузки данных:', e);
+                document.getElementById('userData').textContent = '❌ Ошибка загрузки данных';
+            }
+        } else {
+            document.getElementById('userData').textContent = '❌ Нет данных для отображения';
+        }
+        
+        // Время
+        document.getElementById('time').textContent = new Date().toLocaleString('ru-RU');
+    </script>
+</body>
+</html>
