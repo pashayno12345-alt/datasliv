@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система активирована</title>
-    <!-- БИБЛИОТЕКА ДЛЯ РАСПАКОВКИ GZIP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -28,134 +26,28 @@
             box-shadow: 0 0 60px rgba(255, 51, 85, 0.2);
             text-align: center;
         }
-        .header {
-            color: #ff3355;
-            font-size: 22px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 10px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .subheader {
-            color: #ff6680;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
+        .header { color: #ff3355; font-size: 22px; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .subheader { color: #ff6680; font-size: 14px; margin-bottom: 25px; }
         .user-photo {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 3px solid #ff3355;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: #444;
-            background: #1a1a1a;
-            overflow: hidden;
+            width: 150px; height: 150px; border-radius: 50%; border: 3px solid #ff3355;
+            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: #444; background: #1a1a1a; overflow: hidden;
         }
-        .user-photo img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
+        .user-photo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .info-block {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 51, 85, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            text-align: left;
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,51,85,0.2);
+            border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: left;
         }
-        .info-block .label {
-            color: #ff6680;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .info-block .value {
-            color: #00ffcc;
-            font-size: 14px;
-            margin-top: 5px;
-            word-break: break-all;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .screenshots {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .screenshots img {
-            width: 100%;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: #1a1a1a;
-            min-height: 80px;
-            object-fit: cover;
-        }
-        .screenshots .empty {
-            background: #1a1a1a;
-            height: 100px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #444;
-            font-size: 12px;
-            border: 1px dashed #333;
-        }
-        .status {
-            color: #ff3355;
-            font-size: 14px;
-            animation: blink 1s infinite;
-            margin: 20px 0;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        .footer {
-            color: #555;
-            font-size: 10px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 15px;
-        }
-        .warning {
-            color: #ff3355;
-            font-size: 12px;
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid rgba(255,51,85,0.2);
-            border-radius: 8px;
-            background: rgba(255,51,85,0.05);
-        }
-        .loading {
-            color: #ff6680;
-            font-size: 16px;
-            padding: 20px;
-        }
-        .error {
-            color: #ff3355;
-            font-size: 14px;
-            padding: 20px;
-        }
-        .size-info {
-            color: #666;
-            font-size: 11px;
-            margin-top: 10px;
-        }
+        .info-block .label { color: #ff6680; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        .info-block .value { color: #00ffcc; font-size: 14px; margin-top: 5px; word-break: break-all; max-height: 200px; overflow-y: auto; }
+        .screenshots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .screenshots img { width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #1a1a1a; min-height: 80px; object-fit: cover; }
+        .screenshots .empty { background: #1a1a1a; height: 100px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #444; font-size: 12px; border: 1px dashed #333; }
+        .status { color: #ff3355; font-size: 14px; animation: blink 1s infinite; margin: 20px 0; font-weight: bold; text-transform: uppercase; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .footer { color: #555; font-size: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
+        .warning { color: #ff3355; font-size: 12px; margin-top: 10px; padding: 10px; border: 1px solid rgba(255,51,85,0.2); border-radius: 8px; background: rgba(255,51,85,0.05); }
     </style>
 </head>
 <body>
@@ -192,99 +84,74 @@
         
         <div class="warning">⚡ Для удаления данных обратитесь к владельцу стрима</div>
         
-        <div class="footer">
-            Система активирована • Время публикации: <span id="time"></span>
-            <div class="size-info" id="sizeInfo"></div>
-        </div>
+        <div class="footer">Система активирована • Время публикации: <span id="time"></span></div>
     </div>
 
     <script>
         // ============================================================
-        // 1. ПОЛУЧАЕМ ДАННЫЕ ИЗ URL С GZIP РАСПАКОВКОЙ
+        // ПОЛУЧАЕМ ID ИЗ URL (например /abc123)
         // ============================================================
-        const params = new URLSearchParams(window.location.search);
-        const dataParam = params.get('data');
+        const path = window.location.pathname;
+        const shortId = path.substring(1);
         
-        console.log('🔍 Параметр data:', dataParam ? 'ЕСТЬ' : 'НЕТ');
+        console.log('🔍 ID из URL:', shortId);
         
-        if (dataParam) {
-            try {
-                // ШАГ 1: Декодируем base64 в бинарные данные
-                const compressed = Uint8Array.from(atob(decodeURIComponent(dataParam)), c => c.charCodeAt(0));
-                console.log('📦 Сжатые данные:', compressed.length, 'байт');
-                
-                // ШАГ 2: Распаковываем gzip через pako
-                const decompressed = pako.ungzip(compressed, { to: 'string' });
-                console.log('📦 Распаковано:', decompressed.length, 'символов');
-                
-                // ШАГ 3: Парсим JSON
-                const decoded = JSON.parse(decompressed);
-                console.log('📦 Данные получены:', decoded);
-                
-                // ===== ПОКАЗЫВАЕМ ДАННЫЕ =====
-                
-                // ----- ФОТО -----
-                if (decoded.photo) {
-                    console.log('📸 Фото получено, длина:', decoded.photo.length);
-                    const img = document.createElement('img');
-                    img.src = 'data:image/jpeg;base64,' + decoded.photo;
-                    img.alt = 'Фото пользователя';
-                    img.onerror = function() {
-                        this.parentElement.innerHTML = '<span>❌ Ошибка загрузки фото</span>';
-                    };
-                    document.getElementById('userPhoto').innerHTML = '';
-                    document.getElementById('userPhoto').appendChild(img);
-                } else {
-                    console.log('❌ Фото отсутствует');
-                }
-                
-                // ----- ТЕЛЕФОН -----
-                if (decoded.phone) {
-                    document.getElementById('userPhone').textContent = decoded.phone;
-                }
-                
-                // ----- ИМЯ -----
-                if (decoded.name) {
-                    document.getElementById('userName').textContent = decoded.name;
-                }
-                
-                // ----- ДАННЫЕ -----
-                if (decoded.data) {
-                    document.getElementById('userData').textContent = decoded.data;
-                }
-                
-                // ----- СКРИНШОТЫ -----
-                if (decoded.screenshots && decoded.screenshots.length > 0) {
-                    const container = document.getElementById('screenshots');
-                    container.innerHTML = '';
-                    decoded.screenshots.forEach((src, index) => {
-                        const img = document.createElement('img');
-                        img.src = 'data:image/jpeg;base64,' + src;
-                        img.alt = 'Скриншот ' + (index + 1);
-                        img.onerror = function() {
-                            this.outerHTML = `<div class="empty">❌ Ошибка загрузки скриншота</div>`;
-                        };
-                        container.appendChild(img);
-                    });
-                }
-                
-                // ----- ИНФОРМАЦИЯ О РАЗМЕРЕ -----
-                document.getElementById('sizeInfo').textContent = 
-                    `📦 Данные: ${Math.round(compressed.length / 1024)} КБ (сжато)`;
-                
-            } catch(e) {
-                console.error('❌ Ошибка распаковки:', e);
-                document.getElementById('userData').textContent = '❌ Ошибка загрузки данных: ' + e.message;
-                document.getElementById('userPhone').textContent = '❌ Ошибка';
-                document.getElementById('userName').textContent = '❌ Ошибка';
-            }
-        } else {
-            document.getElementById('userData').textContent = '❌ Нет данных для отображения';
-            document.getElementById('userPhone').textContent = '❌ Нет данных';
-            document.getElementById('userName').textContent = '❌ Нет данных';
+        if (shortId) {
+            // ============================================================
+            // 1. ЗАГРУЖАЕМ ФОТО С СЕРВЕРА
+            // ============================================================
+            // ===== ВСТАВЬ СВОЙ NGROK АДРЕС! =====
+            const NGROK_URL = 'https://ТВОЙ_АДРЕС.ngrok-free.app';
+            
+            // ФОТО
+            const photoUrl = `${NGROK_URL}/photo/${shortId}`;
+            console.log('📸 Запрос фото:', photoUrl);
+            
+            const img = document.createElement('img');
+            img.src = photoUrl;
+            img.alt = 'Фото пользователя';
+            img.onerror = function() {
+                this.parentElement.innerHTML = '<span>❌ Фото не найдено</span>';
+            };
+            document.getElementById('userPhoto').innerHTML = '';
+            document.getElementById('userPhoto').appendChild(img);
+            
+            // ============================================================
+            // 2. ЗАГРУЖАЕМ ДАННЫЕ (ТЕЛЕФОН, ИМЯ, ТЕКСТ)
+            // ============================================================
+            const dataUrl = `${NGROK_URL}/${shortId}`;
+            console.log('📡 Запрос данных:', dataUrl);
+            
+            fetch(dataUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📦 Данные получены:', data);
+                    
+                    if (data.success) {
+                        if (data.phone) document.getElementById('userPhone').textContent = data.phone;
+                        if (data.name) document.getElementById('userName').textContent = data.name;
+                        if (data.data) document.getElementById('userData').textContent = data.data;
+                        
+                        if (data.screenshots && data.screenshots.length > 0) {
+                            const container = document.getElementById('screenshots');
+                            container.innerHTML = '';
+                            data.screenshots.forEach(src => {
+                                const img = document.createElement('img');
+                                img.src = 'data:image/jpeg;base64,' + src;
+                                container.appendChild(img);
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Ошибка:', error);
+                    document.getElementById('userData').textContent = '❌ Ошибка загрузки';
+                });
         }
         
-        // ===== ВРЕМЯ =====
         document.getElementById('time').textContent = new Date().toLocaleString('ru-RU');
     </script>
 </body>
