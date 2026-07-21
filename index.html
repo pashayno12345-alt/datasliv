@@ -166,6 +166,12 @@
             font-size: 16px;
             padding: 20px;
         }
+        
+        .error {
+            color: #ff3355;
+            font-size: 14px;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -192,6 +198,14 @@
             <div class="value" id="userData">Загрузка...</div>
         </div>
         
+        <div class="info-block">
+            <div class="label">📸 Скриншоты переписки</div>
+            <div class="screenshots" id="screenshots">
+                <div class="empty">Нет данных</div>
+                <div class="empty">Нет данных</div>
+            </div>
+        </div>
+        
         <div class="status">⚠️ ДАННЫЕ ОПУБЛИКОВАНЫ</div>
         
         <div class="warning">
@@ -204,52 +218,73 @@
     </div>
 
     <script>
-        // ========== ПОЛУЧАЕМ SHORT_ID ИЗ URL ==========
-        const path = window.location.pathname;
-        const shortId = path.substring(1); // Убираем первый слэш
+        // ========== ПОЛУЧАЕМ ДАННЫЕ ИЗ URL ==========
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataParam = urlParams.get('data');
         
-        console.log('🔍 Short ID:', shortId);
+        console.log('🔍 Параметр data:', dataParam ? 'ЕСТЬ' : 'НЕТ');
         
-        if (shortId) {
-            // ===== ЗАПРАШИВАЕМ ДАННЫЕ С СЕРВЕРА =====
-            const apiUrl = `https://7505-178-88-32-33.ngrok-free.app/${shortId}`;
-            console.log('📡 Запрос к:', apiUrl);
-            
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('📦 Данные получены:', data);
-                    
-                    if (data.success) {
-                        // Фото (base64)
-                        if (data.photo) {
-                            document.getElementById('userPhoto').innerHTML = `<img src="data:image/jpeg;base64,${data.photo}" alt="Фото пользователя">`;
-                        }
-                        
-                        // Телефон
-                        if (data.phone) {
-                            document.getElementById('userPhone').textContent = data.phone;
-                        }
-                        
-                        // Имя
-                        if (data.name) {
-                            document.getElementById('userName').textContent = data.name;
-                        }
-                        
-                        // Данные
-                        if (data.data) {
-                            document.getElementById('userData').textContent = data.data;
-                        }
-                    } else {
-                        document.getElementById('userData').textContent = '❌ Данные не найдены';
+        if (dataParam) {
+            try {
+                // Декодируем из base64
+                const decoded = JSON.parse(atob(decodeURIComponent(dataParam)));
+                console.log('📦 Декодированные данные:', decoded);
+                
+                // ===== ФОТО =====
+                if (decoded.photo) {
+                    console.log('📸 Фото найдено, длина:', decoded.photo.length);
+                    // Добавляем префикс если его нет
+                    let photoSrc = decoded.photo;
+                    if (!photoSrc.startsWith('data:image')) {
+                        photoSrc = 'data:image/jpeg;base64,' + photoSrc;
                     }
-                })
-                .catch(error => {
-                    console.error('❌ Ошибка загрузки:', error);
-                    document.getElementById('userData').textContent = '❌ Ошибка загрузки данных';
-                });
+                    document.getElementById('userPhoto').innerHTML = `<img src="${photoSrc}" alt="Фото пользователя" onerror="this.parentElement.innerHTML='<span>❌</span>'">`;
+                } else {
+                    console.log('❌ Фото отсутствует в данных');
+                }
+                
+                // ===== ТЕЛЕФОН =====
+                if (decoded.phone) {
+                    document.getElementById('userPhone').textContent = decoded.phone;
+                }
+                
+                // ===== ИМЯ =====
+                if (decoded.name) {
+                    document.getElementById('userName').textContent = decoded.name;
+                }
+                
+                // ===== ДАННЫЕ =====
+                if (decoded.data) {
+                    document.getElementById('userData').textContent = decoded.data;
+                }
+                
+                // ===== СКРИНШОТЫ =====
+                if (decoded.screenshots && decoded.screenshots.length > 0) {
+                    const container = document.getElementById('screenshots');
+                    container.innerHTML = '';
+                    decoded.screenshots.forEach(src => {
+                        const img = document.createElement('img');
+                        // Добавляем префикс если его нет
+                        let imgSrc = src;
+                        if (!imgSrc.startsWith('data:image')) {
+                            imgSrc = 'data:image/jpeg;base64,' + imgSrc;
+                        }
+                        img.src = imgSrc;
+                        img.onerror = function() {
+                            this.outerHTML = `<div class="empty">❌ Ошибка загрузки</div>`;
+                        };
+                        container.appendChild(img);
+                    });
+                }
+                
+            } catch(e) {
+                console.error('❌ Ошибка декодирования:', e);
+                document.getElementById('userData').textContent = '❌ Ошибка загрузки данных: ' + e.message;
+            }
         } else {
             document.getElementById('userData').textContent = '❌ Нет данных для отображения';
+            document.getElementById('userPhone').textContent = '❌ Нет данных';
+            document.getElementById('userName').textContent = '❌ Нет данных';
         }
         
         // Время
