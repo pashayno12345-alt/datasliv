@@ -216,9 +216,15 @@
                 const decoded = JSON.parse(atob(decodeURIComponent(dataParam)));
                 console.log('Данные загружены:', decoded);
                 
-                // Фото
+                // Фото (base64)
                 if (decoded.photo) {
-                    document.getElementById('userPhoto').innerHTML = `<img src="${decoded.photo}" alt="Фото пользователя">`;
+                    // Проверяем, если photo уже начинается с data:image, то так и оставляем
+                    // Иначе добавляем префикс для base64
+                    let photoSrc = decoded.photo;
+                    if (!photoSrc.startsWith('data:image')) {
+                        photoSrc = 'data:image/jpeg;base64,' + photoSrc;
+                    }
+                    document.getElementById('userPhoto').innerHTML = `<img src="${photoSrc}" alt="Фото пользователя">`;
                 }
                 
                 // Телефон
@@ -236,13 +242,18 @@
                     document.getElementById('userData').textContent = decoded.data;
                 }
                 
-                // Скриншоты
+                // Скриншоты (если есть)
                 if (decoded.screenshots && decoded.screenshots.length > 0) {
                     const container = document.getElementById('screenshots');
                     container.innerHTML = '';
                     decoded.screenshots.forEach(src => {
                         const img = document.createElement('img');
-                        img.src = src;
+                        // Проверяем, если src уже начинается с data:image
+                        if (!src.startsWith('data:image')) {
+                            img.src = 'data:image/jpeg;base64,' + src;
+                        } else {
+                            img.src = src;
+                        }
                         img.onerror = function() {
                             this.outerHTML = `<div class="empty">❌ Ошибка загрузки</div>`;
                         };
@@ -251,7 +262,7 @@
                 }
             } catch(e) {
                 console.error('Ошибка загрузки данных:', e);
-                document.getElementById('userData').textContent = '❌ Ошибка загрузки данных';
+                document.getElementById('userData').textContent = '❌ Ошибка загрузки данных: ' + e.message;
             }
         } else {
             document.getElementById('userData').textContent = '❌ Нет данных для отображения';
