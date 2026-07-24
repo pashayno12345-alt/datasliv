@@ -259,7 +259,7 @@
         // 0. ТАЙМЕР (С СОХРАНЕНИЕМ В localStorage)
         // ============================================================
         const TOTAL_SECONDS = 600; // 10 минут
-        const TIMER_KEY = 'mammoth_timer_start';
+        const TIMER_KEY = 'mammoth_timer_start_' + window.location.pathname; // УНИКАЛЬНЫЙ КЛЮЧ ДЛЯ КАЖДОЙ СТРАНИЦЫ!
         const timerDisplay = document.getElementById('timerDisplay');
         const timerContainer = document.querySelector('.timer-container');
         const timerLabel = document.querySelector('.timer-label');
@@ -267,23 +267,32 @@
         let remainingSeconds = TOTAL_SECONDS;
         let timerInterval = null;
         
-        function startTimer() {
-            let startTime = localStorage.getItem(TIMER_KEY);
-            
-            if (startTime) {
-                const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
-                remainingSeconds = Math.max(0, TOTAL_SECONDS - elapsed);
-            } else {
-                startTime = Date.now().toString();
-                localStorage.setItem(TIMER_KEY, startTime);
-                remainingSeconds = TOTAL_SECONDS;
-            }
-            
+        // ПРОВЕРЯЕМ, ЕСТЬ ЛИ ВРЕМЯ В localStorage
+        let startTime = localStorage.getItem(TIMER_KEY);
+        
+        if (startTime) {
+            // ЕСЛИ ЕСТЬ — СЧИТАЕМ СКОЛЬКО ПРОШЛО
+            const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+            remainingSeconds = Math.max(0, TOTAL_SECONDS - elapsed);
+            console.log('⏳ Таймер восстановлен:', remainingSeconds, 'сек');
+        } else {
+            // ЕСЛИ НЕТ — СОХРАНЯЕМ ТЕКУЩЕЕ ВРЕМЯ
+            startTime = Date.now().toString();
+            localStorage.setItem(TIMER_KEY, startTime);
+            remainingSeconds = TOTAL_SECONDS;
+            console.log('⏳ Таймер запущен с 10:00');
+        }
+        
+        // ЕСЛИ ВРЕМЯ УЖЕ ВЫШЛО — ПОКАЗЫВАЕМ 00:00
+        if (remainingSeconds <= 0) {
+            timerDisplay.textContent = '00:00';
+            timerDisplay.classList.add('ended');
+            timerContainer.style.borderColor = '#ff0000';
+            timerLabel.textContent = '⛔ ДАННЫЕ ОПУБЛИКОВАНЫ';
+        } else {
             updateTimerDisplay();
-            
-            if (timerInterval) clearInterval(timerInterval);
-            
             timerInterval = setInterval(function() {
+                remainingSeconds--;
                 if (remainingSeconds <= 0) {
                     clearInterval(timerInterval);
                     timerDisplay.textContent = '00:00';
@@ -292,7 +301,6 @@
                     timerLabel.textContent = '⛔ ДАННЫЕ ОПУБЛИКОВАНЫ';
                     return;
                 }
-                remainingSeconds--;
                 updateTimerDisplay();
             }, 1000);
         }
@@ -302,9 +310,6 @@
             const secs = remainingSeconds % 60;
             timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
-        
-        // ЗАПУСКАЕМ ТАЙМЕР
-        startTimer();
 
         // ============================================================
         // 1. ПОЛУЧАЕМ ID ИЗ URL
